@@ -1,4 +1,4 @@
-using MainAPI.Repository;
+using Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
 namespace WebApplication1
@@ -21,15 +21,11 @@ namespace WebApplication1
             });
             builder.Services.AddAuthorization(options =>
             {
-                options.AddPolicy("Policy1", policy => policy.RequireRole("Role1").RequireRole("Role2"));
-                options.AddPolicy("Policy2", policy => policy.RequireClaim("Role", "User", "Admin"));
+                options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
+                options.AddPolicy("User", policy => policy.RequireRole("Admin").RequireRole("User"));
             });
-            builder.Services.AddScoped<IClientSourceAuthentication, ClientSourceAuthentication>();
-            builder.Services.AddScoped<ISinhVienRepository, SinhVienReponsitory>();
-            builder.Services.AddScoped<IAuthenRepo, AuthenRepo>();
-            builder.Services.AddSingleton<IConversation, Conversation>();
-            builder.Services.AddDatabase(builder.Configuration);
-            builder.Services.AddAutoMapper(typeof(MappingProfile));
+            builder.Services.AddXAuthentication(builder.Configuration);
+            builder.Services.AddSingleton<GenerateJwtToken>();
             builder.Services.AddControllers();
             builder.Services.AddHttpClient();
             var app = builder.Build();
