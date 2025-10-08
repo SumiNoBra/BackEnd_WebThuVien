@@ -1,0 +1,118 @@
+status 
+200:thanh cong
+404:khong tim thay
+400:bad request
+409:conflict/da do du lieu
+500:loi ben server
+
+return về status 200 : thì biết là dữ liệu đã được trả về hoặc tạo thành công cái gì đó
+return về status 400 : có nghĩa là lỗi dữ liệu truyền vào server , phải xem dữ liệu server trả về để biết lỗi ở đâu
+	error=isnull (giá trị truyền vào server có dữ liệu mà server yêu cầu không được để trống dữ liệu đó)
+	error=ishas = status 409 (giá trị truyền vào đã có trong bảng dữ liệu " thường bị trùng khóa chính")
+	error=uncorrect (database đọc/ghi dữ liệu thành công nhưng row trả về = 0)
+	error=wrong (sai yêu cầu của database vd:năm xuất bản =2100)
+return về status 404 : không tìm thấy dữ liệu đã yêu cầu
+return về status 500 : lỗi bên server, thường là lỗi khi lưu vào database
+
+
+đăng nhập
+post :https://localhost:7034/auth/login
+{
+    "email":"...",
+    "password":"..."
+}
+đọc status
+200: return { token }
+
+đăng ký
+post :https://localhost:7034/auth/register
+{
+    "hoten":"...",
+    "email":"...",
+    "sdt":"...",
+    "matkhau":"..."
+}
+đọc status	
+
+lấy tất cả sách
+get:https://localhost:7034/api/sach/getall
+200:return mảng     {
+        "masach": ...,
+        "tensach": ...,
+        "tacgia": ...,
+        "matheloai": ...,
+        "manxb": ...,
+        "namxuatban": ...,
+        "soluong": ...,
+        "vitrisach": ...,
+        "anhbia": ...,
+        "maqr": ...,
+        "trangthai": "..."
+		}
+
+lấy sách bằng id sách
+get:/api/sach/...
+200:return {
+        "masach": ...,
+        "tensach": ...,
+        "tacgia": ...,
+        "matheloai": ...,
+        "manxb": ...,
+        "namxuatban": ...,
+        "soluong": ...,
+        "vitrisach": ...,
+        "anhbia": ...,
+        "maqr": ...,
+        "trangthai": "..."
+}
+
+lấy sách bằng mã thể loại sách
+get:/api/sach/theloai/...
+200:return mảng     {
+        "masach": ...,
+        "tensach": ...,
+        "tacgia": ...,
+        "matheloai": ...,
+        "manxb": ...,
+        "namxuatban": ...,
+        "soluong": ...,
+        "vitrisach": ...,
+        "anhbia": ...,
+        "maqr": ...,
+        "trangthai": "..."
+		}
+
+
+lấy sách bằng tên sách
+get:/api/sach/search?keyword=...
+200:return mảng     {
+        "masach": ...,
+        "tensach": ...,
+        "tacgia": ...,
+        "matheloai": ...,
+        "manxb": ...,
+        "namxuatban": ...,
+        "soluong": ...,
+        "vitrisach": ...,
+        "anhbia": ...,
+        "maqr": ...,
+        "trangthai": "..."
+		}
+
+update sách (yêu cầu phải đăng nhập với tài khoản admin) 
+post :/api/sach/update
+yêu cầu phải có {
+		    "masach":..,
+		thêm các cột vào nếu muốn thay đổi dữ liệu của cột đó
+		}
+
+
+them sách (yêu cầu phải đăng nhập với tài khoản admin)
+post :/api/sach/add
+yêu cầu phải có {
+    "tensach":"...",
+	thêm các cột vào nếu muốn thêm dữ liệu của cột đó
+
+}
+400:"" có xuất hiện cái khóa ngoại mà chúng không tồn tại
+
