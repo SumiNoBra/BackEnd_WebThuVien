@@ -22,9 +22,8 @@ namespace Authorization
         public XAuthenticationHandler(
             IOptionsMonitor<XAuthenticationHandlerOptions> options,
             ILoggerFactory logger,
-            UrlEncoder encoder,
-            ISystemClock clock
-        ) : base(options, logger, encoder, clock)
+            UrlEncoder encoder
+        ) : base(options, logger, encoder)
         {
         }
 
@@ -69,7 +68,7 @@ namespace Authorization
                 principal = handler.ValidateToken(tokenValue, TokenValidationParameters, out token);
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 principal = null;
                 token = null;

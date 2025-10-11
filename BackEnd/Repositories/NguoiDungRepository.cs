@@ -1,59 +1,53 @@
 ﻿using AutoMapper;
 using BackEnd.DTo;
 using BackEnd.EF_Contexts;
+using BackEnd.Interfaces;
 using Microsoft.EntityFrameworkCore;
 namespace BackEnd.Repositories
 {
     public class NguoiDungRepository : INguoiDungRepository
     {
         public QlThuvienContext _context;
-        private IMapper _mapper;
-        public NguoiDungRepository(QlThuvienContext context,IMapper mapper)
+
+        public NguoiDungRepository(QlThuvienContext context)
         {
-            _mapper = mapper;
             _context = context;
         }
-        public async Task<int> DangNhap(string email, string matkhau, string vaitro)
+        public async Task<int> ExistNguoiDungAsync(string email, string matkhau, string vaitro)
         {
-            if (email == null || matkhau == null)
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(matkhau))
             {
                 throw new ArgumentNullException("Email hoặc mật khẩu không được để trống");
             }
-            Nguoidung? isHas = await _context.Nguoidungs.FirstOrDefaultAsync(x => x.Email == email && x.Matkhau == matkhau);
-
-            if (isHas == null)
+            Nguoidung ? isHas = await _context.Nguoidungs.AsNoTracking().Where(x => x.Email == email && x.Matkhau == matkhau).FirstOrDefaultAsync();
+            if (isHas==null)
             {
                 return -1;
             }
-
             vaitro = isHas.Vaitro;
-            return isHas.Manguoidung;
+            return 1;
         }
-        public async Task<int> DangKy(RegisterDTO registerDTO)
+        public async Task AddAsync(Nguoidung user)
         {
-            if (registerDTO.Email == null || registerDTO.MatKhau == null
-                || registerDTO.Hoten == null || registerDTO.Sdt == null)
+            if (user.Hoten == null || user.Sdt == null)
             {
                 throw new ArgumentNullException("Khong duoc de trong");
             }
-            Nguoidung? isHas = await _context.Nguoidungs.FirstOrDefaultAsync(x => x.Email.Trim() == registerDTO.Email.Trim()
-                                    && x.Matkhau.Trim() == registerDTO.MatKhau.Trim());
-            if (isHas != null)
-            {
-                throw new ArgumentException("dã tồn tại");
-            }
-            Nguoidung nguoidung = _mapper.Map<Nguoidung>(registerDTO);
-            nguoidung.Vaitro = "User";
-            nguoidung.Ngaytao = DateTime.Now;
-            try
-            {
-                await _context.Nguoidungs.AddAsync(nguoidung);
-                return await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException dbEx)
-            {
-                throw new InvalidOperationException("Lỗi khi thêm người dùng vào database: " + dbEx.Message, dbEx);
-            }
+            user.Vaitro = "User";
+            user.Ngaytao = DateTime.Now;
+            await _context.Nguoidungs.AddAsync(user);
+            return;
+
+        }
+
+        public async Task<bool> ExistIDAsync(int ID)
+        {
+            return await _context.Nguoidungs.AsNoTracking()
+                                 .AnyAsync(x => x.Manguoidung == ID);
+        }
+        public async Task<bool> ExistEmail(string email)
+        {
+            return await _context.Nguoidungs.AsNoTracking().AnyAsync(x => x.Email == email);
         }
     }
 }

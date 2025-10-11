@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
 using BackEnd.EF_Contexts;
 using BackEnd.Repositories;
+using BackEnd.Middleware;
+using BackEnd.Interfaces;
 namespace WebApplication1
 {
     public class Program
@@ -27,24 +29,25 @@ namespace WebApplication1
                 options.AddPolicy("User", policy => policy.RequireRole("Admin").RequireRole("User"));
             });
             builder.Services.AddXAuthentication(builder.Configuration);
+            builder.Services.AddSingleton<GenerateJwtToken>();
             builder.Services.AddDbContext<QlThuvienContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("QL_THUVIEN"));
             });
-            builder.Services.AddSingleton<GenerateJwtToken>();
             builder.Services.AddScoped<ISachRepository, SachRepository>();
             builder.Services.AddScoped<INguoiDungRepository, NguoiDungRepository>();
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddControllers();
             builder.Services.AddHttpClient();
             builder.Services.AddAutoMapper(typeof(MappingProfile));
             var app = builder.Build();
-            //app.UseHttpsRedirection();
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }
             app.UseCors("CORS");
+            app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
