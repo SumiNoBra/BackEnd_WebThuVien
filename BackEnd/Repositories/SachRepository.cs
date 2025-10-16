@@ -41,7 +41,7 @@ namespace BackEnd.Repositories
             }
             if (sach.Namxuatban.HasValue)
             {
-                var thisYear = DateTime.Now.Year;
+                int thisYear = DateTime.Now.Year;
                 if (sach.Namxuatban < 1000 || sach.Namxuatban > thisYear)
                     throw new ArgumentException($"Năm xuất bản (Namxuatban) phải nằm trong khoảng 0..{thisYear}.");
             }
@@ -57,27 +57,27 @@ namespace BackEnd.Repositories
 
         public async Task<bool> ExistMaSach(int masach)
         {
-            return await _context.Saches.Where(s => s.Masach == masach).AnyAsync();
+            return await _context.Saches.AsNoTracking().Where(s => s.Masach == masach).AnyAsync();
         }
 
         public async Task<bool> ExistNXB(int manxb)
         {
-            return await _context.Nhaxuatbans.AnyAsync(n => n.Manxb == manxb);
+            return await _context.Nhaxuatbans.AsNoTracking().AnyAsync(n => n.Manxb == manxb);
         }
 
         public async Task<bool> ExistTheloai(int matheloai)
         {
-            return await _context.Theloais.AnyAsync(t => t.Matheloai == matheloai);
+            return await _context.Theloais.AsNoTracking().AnyAsync(t => t.Matheloai == matheloai);
         }
 
-        public  async Task<List<Sach>> GetAllAsync()
+        public async Task<List<Sach>> GetAllAsync()
         {
             return await _context.Saches.AsNoTracking().ToListAsync();
         }
 
         public async Task<Sach> GetByIDAsync(int Masach)
         {
-            return await _context.Saches.AsNoTracking().FirstOrDefaultAsync(s => s.Masach == Masach);
+            return await _context.Saches.FirstOrDefaultAsync(s => s.Masach == Masach);
         }
 
         public Task<List<Sach>> GetByNXBIDAsync(int nxbId)
@@ -90,7 +90,7 @@ namespace BackEnd.Repositories
             return await _context.Saches.AsNoTracking().Where(s => s.Matheloai == matheloai).ToListAsync();
         }
 
-        public async Task<List<Sach>> SearchByNameAsync(string keyword)
+        public async Task<List<Sach>> GetByNameAsync(string keyword)
         {
             if (string.IsNullOrWhiteSpace(keyword))
             {
@@ -103,6 +103,10 @@ namespace BackEnd.Repositories
             return await _context.Saches.AsNoTracking()
                 .Where(s => s.Tensach.ToLower().Contains(keyword))
                 .ToListAsync();
+        }
+        public Task<List<Sach>> GetByNamAsync(int nam)
+        {
+            return _context.Saches.AsNoTracking().Where(s => s.Namxuatban == nam).ToListAsync();
         }
         public async Task UpdateAsync(Sach sach)
         {
@@ -161,12 +165,17 @@ namespace BackEnd.Repositories
             }
             try
             {
-                
+
             }
             catch (DbUpdateException dbEx)
             {
                 throw new InvalidOperationException("Lỗi khi cập nhật database.", dbEx);
             }
+        }
+
+        public async Task<List<Sach>> GetByTrangThai(string trangthai)
+        {
+            return await _context.Saches.AsNoTracking().Where(s => s.Trangthai == trangthai).ToListAsync();
         }
     }
 }

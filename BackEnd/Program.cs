@@ -36,6 +36,7 @@ namespace WebApplication1
             });
             builder.Services.AddScoped<ISachRepository, SachRepository>();
             builder.Services.AddScoped<INguoiDungRepository, NguoiDungRepository>();
+            builder.Services.AddScoped<IYeuCauMuonRepository,YeuCauMuonRepository>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddControllers();
             builder.Services.AddHttpClient();

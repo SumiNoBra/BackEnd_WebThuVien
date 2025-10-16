@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace BackEnd.EF_Contexts;
 
-public partial class Docgium
+public partial class Docgia
 {
     public int Madocgia { get; set; }
 

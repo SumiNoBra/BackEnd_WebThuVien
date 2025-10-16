@@ -8,15 +8,19 @@ namespace BackEnd.Repositories
         private readonly QlThuvienContext _context;
         public ISachRepository Saches { get; private set; }
         public INguoiDungRepository NguoiDungs { get; private set; }
+        public IYeuCauMuonRepository YeuCauMuons { get; private set; }
+        public IPhieuMuonRepository PhieuMuons { get; private set; }
+        public IDocGiaRepository DocGias { get; private set; }
 
         public UnitOfWork(
-            QlThuvienContext qlThuvienContext,
-            ISachRepository sachRepository,
-            INguoiDungRepository nguoiDungRepository)
+            QlThuvienContext qlThuvienContext)
         {
             _context = qlThuvienContext;
-            Saches = sachRepository;
-            NguoiDungs = nguoiDungRepository;
+            Saches = new SachRepository(_context);
+            NguoiDungs = new NguoiDungRepository(_context);
+            YeuCauMuons = new YeuCauMuonRepository(_context);
+            PhieuMuons = new PhieuMuonRepository(_context);
+            DocGias = new DocGiaRepository(_context);
         }
         public async Task CompleteAsync()
         {

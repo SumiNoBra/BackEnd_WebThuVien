@@ -21,7 +21,11 @@ public partial class QlThuvienContext : DbContext
 
     public virtual DbSet<ChatbotLog> ChatbotLogs { get; set; }
 
-    public virtual DbSet<Docgium> Docgia { get; set; }
+    public virtual DbSet<Chitietphieumuon> Chitietphieumuons { get; set; }
+
+    public virtual DbSet<Chitietyeucaumuon> Chitietyeucaumuons { get; set; }
+
+    public virtual DbSet<Docgia> Docgias { get; set; }
 
     public virtual DbSet<HoatdongLog> HoatdongLogs { get; set; }
 
@@ -44,12 +48,11 @@ public partial class QlThuvienContext : DbContext
     public virtual DbSet<Thongbao> Thongbaos { get; set; }
 
     public virtual DbSet<Yeucaumuon> Yeucaumuons { get; set; }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Baocao>(entity =>
         {
-            entity.HasKey(e => e.Mabaocao).HasName("PK__BAOCAO__AA13419BD0B991C2");
+            entity.HasKey(e => e.Mabaocao).HasName("PK__BAOCAO__AA13419B3593FA18");
 
             entity.ToTable("BAOCAO");
 
@@ -66,7 +69,7 @@ public partial class QlThuvienContext : DbContext
 
         modelBuilder.Entity<ChatbotFaq>(entity =>
         {
-            entity.HasKey(e => e.Mafaq).HasName("PK__CHATBOT___784D155A1C0CD112");
+            entity.HasKey(e => e.Mafaq).HasName("PK__CHATBOT___784D155A58137699");
 
             entity.ToTable("CHATBOT_FAQ");
 
@@ -82,7 +85,7 @@ public partial class QlThuvienContext : DbContext
 
         modelBuilder.Entity<ChatbotLog>(entity =>
         {
-            entity.HasKey(e => e.Malog).HasName("PK__CHATBOT___7A3DE268A140D588");
+            entity.HasKey(e => e.Malog).HasName("PK__CHATBOT___7A3DE268834CD6E7");
 
             entity.ToTable("CHATBOT_LOG");
 
@@ -100,16 +103,58 @@ public partial class QlThuvienContext : DbContext
 
             entity.HasOne(d => d.ManguoidungNavigation).WithMany(p => p.ChatbotLogs)
                 .HasForeignKey(d => d.Manguoidung)
-                .HasConstraintName("FK__CHATBOT_L__MANGU__6C190EBB");
+                .HasConstraintName("FK__CHATBOT_L__MANGU__693CA210");
         });
 
-        modelBuilder.Entity<Docgium>(entity =>
+        modelBuilder.Entity<Chitietphieumuon>(entity =>
         {
-            entity.HasKey(e => e.Madocgia).HasName("PK__DOCGIA__8CA726FCB1672170");
+            entity.HasKey(e => new { e.Maphieumuon, e.Masach }).HasName("PK__CHITIETP__EC6B8F8F881B5047");
+
+            entity.ToTable("CHITIETPHIEUMUON");
+
+            entity.Property(e => e.Maphieumuon).HasColumnName("MAPHIEUMUON");
+            entity.Property(e => e.Masach).HasColumnName("MASACH");
+            entity.Property(e => e.Soluongmuon).HasColumnName("SOLUONGMUON");
+
+            entity.HasOne(d => d.MaphieumuonNavigation).WithMany(p => p.Chitietphieumuons)
+                .HasForeignKey(d => d.Maphieumuon)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__CHITIETPH__MAPHI__797309D9");
+
+            entity.HasOne(d => d.MasachNavigation).WithMany(p => p.Chitietphieumuons)
+                .HasForeignKey(d => d.Masach)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__CHITIETPH__MASAC__7A672E12");
+        });
+
+        modelBuilder.Entity<Chitietyeucaumuon>(entity =>
+        {
+            entity.HasKey(e => new { e.Mayeucau, e.Masach }).HasName("PK__CHITIETY__93E7FEFA0CDF8F2A");
+
+            entity.ToTable("CHITIETYEUCAUMUON");
+
+            entity.Property(e => e.Mayeucau).HasColumnName("MAYEUCAU");
+            entity.Property(e => e.Masach).HasColumnName("MASACH");
+            entity.Property(e => e.Soluongmuon).HasColumnName("SOLUONGMUON");
+
+            entity.HasOne(d => d.MasachNavigation).WithMany(p => p.Chitietyeucaumuons)
+                .HasForeignKey(d => d.Masach)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__CHITIETYE__MASAC__75A278F5");
+
+            entity.HasOne(d => d.MayeucauNavigation).WithMany(p => p.Chitietyeucaumuons)
+                .HasForeignKey(d => d.Mayeucau)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__CHITIETYE__MAYEU__74AE54BC");
+        });
+
+        modelBuilder.Entity<Docgia>(entity =>
+        {
+            entity.HasKey(e => e.Madocgia).HasName("PK__DOCGIA__8CA726FC418C0ED6");
 
             entity.ToTable("DOCGIA");
 
-            entity.HasIndex(e => e.Manguoidung, "UQ__DOCGIA__F6A55C8FCBFAA0F4").IsUnique();
+            entity.HasIndex(e => e.Manguoidung, "UQ__DOCGIA__F6A55C8F108CF98F").IsUnique();
 
             entity.Property(e => e.Madocgia).HasColumnName("MADOCGIA");
             entity.Property(e => e.Manguoidung).HasColumnName("MANGUOIDUNG");
@@ -123,13 +168,13 @@ public partial class QlThuvienContext : DbContext
                 .HasColumnName("TINHTRANGTHE");
 
             entity.HasOne(d => d.ManguoidungNavigation).WithOne(p => p.Docgium)
-                .HasForeignKey<Docgium>(d => d.Manguoidung)
-                .HasConstraintName("FK__DOCGIA__MANGUOID__3F466844");
+                .HasForeignKey<Docgia>(d => d.Manguoidung)
+                .HasConstraintName("FK__DOCGIA__MANGUOID__3E52440B");
         });
 
         modelBuilder.Entity<HoatdongLog>(entity =>
         {
-            entity.HasKey(e => e.Mahdlog).HasName("PK__HOATDONG__CC883D5DCE6DB518");
+            entity.HasKey(e => e.Mahdlog).HasName("PK__HOATDONG__CC883D5DE6710459");
 
             entity.ToTable("HOATDONG_LOG");
 
@@ -149,12 +194,12 @@ public partial class QlThuvienContext : DbContext
 
             entity.HasOne(d => d.ManguoidungNavigation).WithMany(p => p.HoatdongLogs)
                 .HasForeignKey(d => d.Manguoidung)
-                .HasConstraintName("FK__HOATDONG___MANGU__73BA3083");
+                .HasConstraintName("FK__HOATDONG___MANGU__70DDC3D8");
         });
 
         modelBuilder.Entity<LoginLog>(entity =>
         {
-            entity.HasKey(e => e.Mabanglhi).HasName("PK__LOGIN_LO__FF3D7A51CB2D1B3F");
+            entity.HasKey(e => e.Mabanglhi).HasName("PK__LOGIN_LO__FF3D7A51162CC568");
 
             entity.ToTable("LOGIN_LOG");
 
@@ -176,16 +221,18 @@ public partial class QlThuvienContext : DbContext
 
             entity.HasOne(d => d.ManguoidungNavigation).WithMany(p => p.LoginLogs)
                 .HasForeignKey(d => d.Manguoidung)
-                .HasConstraintName("FK__LOGIN_LOG__MANGU__6FE99F9F");
+                .HasConstraintName("FK__LOGIN_LOG__MANGU__6D0D32F4");
         });
 
         modelBuilder.Entity<Nguoidung>(entity =>
         {
-            entity.HasKey(e => e.Manguoidung).HasName("PK__NGUOIDUN__F6A55C8EF57B80FD");
+            entity.HasKey(e => e.Manguoidung).HasName("PK__NGUOIDUN__F6A55C8E68D86F3D");
 
             entity.ToTable("NGUOIDUNG");
 
-            entity.HasIndex(e => e.Email, "UQ_NGUOIDUNG_EMAIL_NOTNULL").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ_NGUOIDUNG_EMAIL_NOTNULL")
+                .IsUnique()
+                .HasFilter("([EMAIL] IS NOT NULL)");
 
             entity.Property(e => e.Manguoidung).HasColumnName("MANGUOIDUNG");
             entity.Property(e => e.Email)
@@ -215,11 +262,11 @@ public partial class QlThuvienContext : DbContext
 
         modelBuilder.Entity<Nhanvien>(entity =>
         {
-            entity.HasKey(e => e.Manhanvien).HasName("PK__NHANVIEN__7E46DD91BB330334");
+            entity.HasKey(e => e.Manhanvien).HasName("PK__NHANVIEN__7E46DD9109DB437D");
 
             entity.ToTable("NHANVIEN");
 
-            entity.HasIndex(e => e.Manguoidung, "UQ__NHANVIEN__F6A55C8F3840BD55").IsUnique();
+            entity.HasIndex(e => e.Manguoidung, "UQ__NHANVIEN__F6A55C8F64E63E6E").IsUnique();
 
             entity.Property(e => e.Manhanvien).HasColumnName("MANHANVIEN");
             entity.Property(e => e.Chucvu)
@@ -232,12 +279,12 @@ public partial class QlThuvienContext : DbContext
 
             entity.HasOne(d => d.ManguoidungNavigation).WithOne(p => p.Nhanvien)
                 .HasForeignKey<Nhanvien>(d => d.Manguoidung)
-                .HasConstraintName("FK__NHANVIEN__MANGUO__440B1D61");
+                .HasConstraintName("FK__NHANVIEN__MANGUO__4316F928");
         });
 
         modelBuilder.Entity<Nhaxuatban>(entity =>
         {
-            entity.HasKey(e => e.Manxb).HasName("PK__NHAXUATB__7ABD9EF2356F96B1");
+            entity.HasKey(e => e.Manxb).HasName("PK__NHAXUATB__7ABD9EF2069087C8");
 
             entity.ToTable("NHAXUATBAN");
 
@@ -258,7 +305,7 @@ public partial class QlThuvienContext : DbContext
 
         modelBuilder.Entity<Phat>(entity =>
         {
-            entity.HasKey(e => e.Maphat).HasName("PK__PHAT__5400198141E901DF");
+            entity.HasKey(e => e.Maphat).HasName("PK__PHAT__54001981BB2AD573");
 
             entity.ToTable("PHAT");
 
@@ -279,19 +326,18 @@ public partial class QlThuvienContext : DbContext
 
             entity.HasOne(d => d.MaphieumuonNavigation).WithMany(p => p.Phats)
                 .HasForeignKey(d => d.Maphieumuon)
-                .HasConstraintName("FK__PHAT__MAPHIEUMUO__5EBF139D");
+                .HasConstraintName("FK__PHAT__MAPHIEUMUO__5BE2A6F2");
         });
 
         modelBuilder.Entity<Phieumuon>(entity =>
         {
-            entity.HasKey(e => e.Maphieumuon).HasName("PK__PHIEUMUO__3F97C76BC892E69E");
+            entity.HasKey(e => e.Maphieumuon).HasName("PK__PHIEUMUO__3F97C76BA1A33381");
 
             entity.ToTable("PHIEUMUON");
 
             entity.Property(e => e.Maphieumuon).HasColumnName("MAPHIEUMUON");
             entity.Property(e => e.Hantra).HasColumnName("HANTRA");
             entity.Property(e => e.Madocgia).HasColumnName("MADOCGIA");
-            entity.Property(e => e.Masach).HasColumnName("MASACH");
             entity.Property(e => e.Ngaymuon)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnName("NGAYMUON");
@@ -307,16 +353,12 @@ public partial class QlThuvienContext : DbContext
 
             entity.HasOne(d => d.MadocgiaNavigation).WithMany(p => p.Phieumuons)
                 .HasForeignKey(d => d.Madocgia)
-                .HasConstraintName("FK__PHIEUMUON__MADOC__534D60F1");
-
-            entity.HasOne(d => d.MasachNavigation).WithMany(p => p.Phieumuons)
-                .HasForeignKey(d => d.Masach)
-                .HasConstraintName("FK__PHIEUMUON__MASAC__5441852A");
+                .HasConstraintName("FK__PHIEUMUON__MADOC__52593CB8");
         });
 
         modelBuilder.Entity<Sach>(entity =>
         {
-            entity.HasKey(e => e.Masach).HasName("PK__SACH__3FC48E4C01A43FCB");
+            entity.HasKey(e => e.Masach).HasName("PK__SACH__3FC48E4C28B848AB");
 
             entity.ToTable("SACH");
 
@@ -349,16 +391,16 @@ public partial class QlThuvienContext : DbContext
 
             entity.HasOne(d => d.ManxbNavigation).WithMany(p => p.Saches)
                 .HasForeignKey(d => d.Manxb)
-                .HasConstraintName("FK__SACH__MANXB__4D94879B");
+                .HasConstraintName("FK__SACH__MANXB__4CA06362");
 
             entity.HasOne(d => d.MatheloaiNavigation).WithMany(p => p.Saches)
                 .HasForeignKey(d => d.Matheloai)
-                .HasConstraintName("FK__SACH__MATHELOAI__4CA06362");
+                .HasConstraintName("FK__SACH__MATHELOAI__4BAC3F29");
         });
 
         modelBuilder.Entity<Theloai>(entity =>
         {
-            entity.HasKey(e => e.Matheloai).HasName("PK__THELOAI__AC8D7C2BA3100490");
+            entity.HasKey(e => e.Matheloai).HasName("PK__THELOAI__AC8D7C2B6B922CDF");
 
             entity.ToTable("THELOAI");
 
@@ -370,7 +412,7 @@ public partial class QlThuvienContext : DbContext
 
         modelBuilder.Entity<Thongbao>(entity =>
         {
-            entity.HasKey(e => e.Mathongbao).HasName("PK__THONGBAO__3F155D4AC5FE43D9");
+            entity.HasKey(e => e.Mathongbao).HasName("PK__THONGBAO__3F155D4A7A072A24");
 
             entity.ToTable("THONGBAO");
 
@@ -394,18 +436,17 @@ public partial class QlThuvienContext : DbContext
 
             entity.HasOne(d => d.ManguoidungNavigation).WithMany(p => p.Thongbaos)
                 .HasForeignKey(d => d.Manguoidung)
-                .HasConstraintName("FK__THONGBAO__MANGUO__6383C8BA");
+                .HasConstraintName("FK__THONGBAO__MANGUO__60A75C0F");
         });
 
         modelBuilder.Entity<Yeucaumuon>(entity =>
         {
-            entity.HasKey(e => e.Mayeucau).HasName("PK__YEUCAUMU__401BB61E4C4D5BEA");
+            entity.HasKey(e => e.Mayeucau).HasName("PK__YEUCAUMU__401BB61E8FB053AC");
 
             entity.ToTable("YEUCAUMUON");
 
             entity.Property(e => e.Mayeucau).HasColumnName("MAYEUCAU");
             entity.Property(e => e.Madocgia).HasColumnName("MADOCGIA");
-            entity.Property(e => e.Masach).HasColumnName("MASACH");
             entity.Property(e => e.Ngayyeucau)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
@@ -417,11 +458,7 @@ public partial class QlThuvienContext : DbContext
 
             entity.HasOne(d => d.MadocgiaNavigation).WithMany(p => p.Yeucaumuons)
                 .HasForeignKey(d => d.Madocgia)
-                .HasConstraintName("FK__YEUCAUMUO__MADOC__59063A47");
-
-            entity.HasOne(d => d.MasachNavigation).WithMany(p => p.Yeucaumuons)
-                .HasForeignKey(d => d.Masach)
-                .HasConstraintName("FK__YEUCAUMUO__MASAC__59FA5E80");
+                .HasConstraintName("FK__YEUCAUMUO__MADOC__571DF1D5");
         });
 
         OnModelCreatingPartial(modelBuilder);

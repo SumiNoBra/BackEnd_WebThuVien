@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
 namespace BackEnd.EF_Contexts;
-
 public partial class HoatdongLog
 {
     public int Mahdlog { get; set; }

@@ -71,7 +71,7 @@ namespace BackEnd.Middleware
                 default:
                     {
                         statusCode = StatusCodes.Status500InternalServerError;
-                        errorResponse = new { error = "exception", message = exception.Message,ex=exception };
+                        errorResponse = new { error = "exception", message = exception.Message };
                         break;
                     }
 

@@ -23,7 +23,7 @@ public partial class Nguoidung
 
     public virtual ICollection<ChatbotLog> ChatbotLogs { get; set; } = new List<ChatbotLog>();
 
-    public virtual Docgium? Docgium { get; set; }
+    public virtual Docgia? Docgium { get; set; }
 
     public virtual ICollection<HoatdongLog> HoatdongLogs { get; set; } = new List<HoatdongLog>();
 

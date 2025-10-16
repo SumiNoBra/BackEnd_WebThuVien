@@ -27,11 +27,11 @@ public partial class Sach
 
     public string? Trangthai { get; set; }
 
+    public virtual ICollection<Chitietphieumuon> Chitietphieumuons { get; set; } = new List<Chitietphieumuon>();
+
+    public virtual ICollection<Chitietyeucaumuon> Chitietyeucaumuons { get; set; } = new List<Chitietyeucaumuon>();
+
     public virtual Nhaxuatban? ManxbNavigation { get; set; }
 
     public virtual Theloai? MatheloaiNavigation { get; set; }
-
-    public virtual ICollection<Phieumuon> Phieumuons { get; set; } = new List<Phieumuon>();
-
-    public virtual ICollection<Yeucaumuon> Yeucaumuons { get; set; } = new List<Yeucaumuon>();
 }

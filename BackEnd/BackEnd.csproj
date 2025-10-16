@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="EF_Contexts\" />
     <Folder Include="Models\" />
   </ItemGroup>
 

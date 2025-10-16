@@ -9,8 +9,6 @@ public partial class Phieumuon
 
     public int? Madocgia { get; set; }
 
-    public int? Masach { get; set; }
-
     public DateOnly? Ngaymuon { get; set; }
 
     public DateOnly? Hantra { get; set; }
@@ -21,9 +19,9 @@ public partial class Phieumuon
 
     public decimal? Sotienphat { get; set; }
 
-    public virtual Docgium? MadocgiaNavigation { get; set; }
+    public virtual ICollection<Chitietphieumuon>? Chitietphieumuons { get; set; } = new List<Chitietphieumuon>();
 
-    public virtual Sach? MasachNavigation { get; set; }
+    public virtual Docgia? MadocgiaNavigation { get; set; }
 
     public virtual ICollection<Phat> Phats { get; set; } = new List<Phat>();
 }

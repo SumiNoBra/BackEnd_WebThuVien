@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-
 namespace BackEnd.EF_Contexts;
 
 public partial class Baocao

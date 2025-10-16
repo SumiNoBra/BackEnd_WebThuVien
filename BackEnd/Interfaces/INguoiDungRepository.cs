@@ -1,4 +1,5 @@
 ﻿using BackEnd.DTo;
+using BackEnd.DTOs;
 using BackEnd.EF_Contexts;
 
 namespace BackEnd.Interfaces
@@ -9,5 +10,8 @@ namespace BackEnd.Interfaces
         public Task AddAsync(Nguoidung user);
         public Task<bool> ExistIDAsync(int ID);
         public Task<bool> ExistEmail(string email);
+        public Task<NguoiDungDTO> GetByIdAsync(int ID);
+        public Task<List<NguoiDungDTO>> GetAll();
+        public Task<bool> UpdateById(Nguoidung user);
     }
 }

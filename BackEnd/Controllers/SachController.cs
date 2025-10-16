@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using BackEnd.EF_Contexts;
-using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
 using BackEnd.DTOs;
-using AutoMapper;
+using BackEnd.EF_Contexts;
 using BackEnd.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 namespace BackEnd.Controllers
 {
     [Route("api/sach")]
@@ -13,20 +14,22 @@ namespace BackEnd.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapping;
-        public SachController( IUnitOfWork unitOfWork, IMapper mapper)
+        public SachController(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _mapping = mapper;
             _unitOfWork = unitOfWork;
         }
+        // lấy tất cả sách
         [HttpGet]
         [Route("getall")]
         [AllowAnonymous]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> GetAll()
         {
             List<Sach> result = await _unitOfWork.Saches.GetAllAsync();
             List<SachDTO> resultDTo = _mapping.Map<List<SachDTO>>(result);
             return Ok(resultDTo);
         }
+        // lấy sách theo mã sách
         [HttpGet("{masach}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetByMasach(int masach)
@@ -39,12 +42,13 @@ namespace BackEnd.Controllers
             SachDTO resultDTO = _mapping.Map<SachDTO>(result);
             return Ok(resultDTO);
         }
+        // lấy sách theo thể loại
         [HttpGet("theloai/{matheloai}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetByTheLoai(int matheloai)
         {
             List<Sach> result = await _unitOfWork.Saches.GetByTheLoaiIDAsync(matheloai);
-            if (result == null )
+            if (result == null)
             {
                 return NotFound();
             }
@@ -53,17 +57,32 @@ namespace BackEnd.Controllers
         }
         [HttpGet("search")]
         [AllowAnonymous]
+        // tìm kiếm sách theo tên sách
         public async Task<IActionResult> Search([FromQuery] string keyword)
         {
-            List<Sach> result = await _unitOfWork.Saches.SearchByNameAsync(keyword);
+            List<Sach> result = await _unitOfWork.Saches.GetByNameAsync(keyword);
             if (result == null || result.Count == 0)
             {
                 return NotFound();
             }
-            List<SachDTO> resultDTO = _mapping.Map<List<SachDTO>>(result); 
+            List<SachDTO> resultDTO = _mapping.Map<List<SachDTO>>(result);
             return Ok(resultDTO);
         }
-        [HttpPut("update")]
+        [HttpGet("nam/{nam}")]
+        [AllowAnonymous]
+        // lấy sách theo năm xuất bản
+        public async Task<IActionResult> GetByNam(int nam)
+        {
+            List<Sach> result = await _unitOfWork.Saches.GetByNamAsync(nam);
+            if (result == null || result.Count == 0)
+            {
+                return NotFound();
+            }
+            List<SachDTO> resultDTO = _mapping.Map<List<SachDTO>>(result);
+            return Ok(resultDTO);
+        }
+        // cập nhật sách
+        [HttpPatch("update")]
         [AllowAnonymous]
         //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update([FromBody] SachDTO sachdto)
@@ -74,6 +93,7 @@ namespace BackEnd.Controllers
             return Ok(new { message = "Cập nhật sách thành công." });
 
         }
+        // thêm sách
         [HttpPost("add")]
         //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> Add([FromBody] SachDTO sachdto)
@@ -83,6 +103,18 @@ namespace BackEnd.Controllers
             await _unitOfWork.CompleteAsync();
             return Ok(new { message = "Thêm sách thành công." });
 
+        }
+        // lấy sách theo trạng thái 
+        [HttpGet("trangthai/{trangthai}")]
+        public async Task<IActionResult> GetByTrangthai(string trangthai)
+        {
+            if (trangthai == null || trangthai == string.Empty)
+            {
+                return BadRequest();
+            }
+            List<Sach> result = await _unitOfWork.Saches.GetByTrangThai(trangthai);
+            List<SachDTO> resultDTo = _mapping.Map<List<SachDTO>>(result);
+            return Ok(resultDTo);
         }
     }
 }

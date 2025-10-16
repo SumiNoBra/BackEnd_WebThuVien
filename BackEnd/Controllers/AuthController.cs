@@ -51,6 +51,7 @@ namespace BackEnd.Controllers
         [HttpPost]
         public async Task<IActionResult> Register([FromBody] RegisterDTO userRegister)
         {
+            Console.WriteLine("");
             Nguoidung user = _mapper.Map<Nguoidung>(userRegister);
             bool result = await _unitOfWork.NguoiDungs.ExistIDAsync(user.Manguoidung);
             bool emailExists = await _unitOfWork.NguoiDungs.ExistEmail(user.Email!);
