@@ -1,10 +1,9 @@
 ﻿using AutoMapper;
-using BackEnd.DTo;
-using BackEnd.EF_Contexts;
-using BackEnd.Interfaces;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+using API.DTOs;
+using Domain.Entities;
+using Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Application.IServices;
 
 namespace BackEnd.Controllers
 {
@@ -12,11 +11,13 @@ namespace BackEnd.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly GenerateJwtToken _generateJwtToken;
+        private readonly JwtTokenService _generateJwtToken;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        public AuthController(GenerateJwtToken generateJwtToken,IMapper mapper,IUnitOfWork unitOfWork)
+        private readonly IGoogleAuthService _authService;
+        public AuthController(JwtTokenService generateJwtToken,IMapper mapper,IUnitOfWork unitOfWork,IGoogleAuthService googleAuthService )
         {
+            _authService = googleAuthService;
             _mapper = mapper;
             _generateJwtToken = generateJwtToken;
             _unitOfWork = unitOfWork;
@@ -47,6 +48,37 @@ namespace BackEnd.Controllers
             });
 
         }
+        [HttpPost("google-login")]
+        public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginDTO model)
+        {
+            if (string.IsNullOrEmpty(model.IdToken))
+            {
+                return BadRequest(new { Message = "ID Token is required." });
+            }
+
+            try
+            {
+                var result = await _authService.HandleGoogleLoginAsync(model.IdToken);
+
+                if (result.IsSuccess)
+                {
+                    return Ok(new
+                    {
+                        Message = "Login successful",
+                        Token = result.CustomJwtToken 
+                    });
+                }
+                else
+                {
+                    return Unauthorized(new { Message = result.ErrorMessage });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "An unexpected error occurred." });
+            }
+        }
+
         [Route("register")]
         [HttpPost]
         public async Task<IActionResult> Register([FromBody] RegisterDTO userRegister)

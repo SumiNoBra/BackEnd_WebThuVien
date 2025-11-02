@@ -1,11 +1,9 @@
 ﻿using AutoMapper;
 using BackEnd.DTOs;
-using BackEnd.EF_Contexts;
-using BackEnd.Interfaces;
+using Domain.Entities;
+using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 namespace BackEnd.Controllers
 {
     [Route("api/sach")]

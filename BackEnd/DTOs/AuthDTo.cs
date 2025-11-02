@@ -1,4 +1,4 @@
-﻿namespace BackEnd.DTo
+﻿namespace API.DTOs
 {
     public class LoginDTo
     {
@@ -11,5 +11,9 @@
         public string? Email { get; set; }
         public string? Sdt { get; set; }
         public string? MatKhau { get; set; }
+    }
+    public class GoogleLoginDTO
+    {
+        public string IdToken { get; set; } = string.Empty;
     }
 }

@@ -1,10 +1,11 @@
-using Authorization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
-using BackEnd.EF_Contexts;
-using BackEnd.Repositories;
 using BackEnd.Middleware;
-using BackEnd.Interfaces;
+using Domain.Entities;
+using Application.Interfaces;
+using Infrastructure.Repositories;
+using Application.IServices;
+using API.Services;
+using API.Authentication;
 namespace WebApplication1
 {
     public class Program
@@ -23,13 +24,13 @@ namespace WebApplication1
                     .AllowAnyHeader();
                 });
             });
+            builder.Services.AddCustomJwtAuthentication(builder.Configuration);
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
                 options.AddPolicy("User", policy => policy.RequireRole("Admin").RequireRole("User"));
             });
-            builder.Services.AddXAuthentication(builder.Configuration);
-            builder.Services.AddSingleton<GenerateJwtToken>();
+            builder.Services.AddSingleton<JwtTokenService>();
             builder.Services.AddDbContext<QlThuvienContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("QL_THUVIEN"));
@@ -38,6 +39,8 @@ namespace WebApplication1
             builder.Services.AddScoped<INguoiDungRepository, NguoiDungRepository>();
             builder.Services.AddScoped<IYeuCauMuonRepository,YeuCauMuonRepository>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<IGoogleAuthService, GoogleAuthService>();
+            builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
             builder.Services.AddControllers();
             builder.Services.AddHttpClient();
             builder.Services.AddAutoMapper(typeof(MappingProfile));

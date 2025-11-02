@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
-using BackEnd.DTo;
+using API.DTOs;
 using BackEnd.DTOs;
-using BackEnd.EF_Contexts;
+using Domain.Entities;
 
 public class MappingProfile : Profile
 {

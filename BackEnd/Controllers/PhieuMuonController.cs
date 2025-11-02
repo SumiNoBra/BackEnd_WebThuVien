@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using BackEnd.DTOs;
-using BackEnd.EF_Contexts;
-using BackEnd.Interfaces;
+using Domain.Entities;
+using Application.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -76,7 +76,7 @@ namespace BackEnd.Controllers
         [HttpGet("getvacreatequahan")]
         public async Task<IActionResult> GetVaCreateQuaHan()
         {
-            List<PhieuMuonDTO> lsphieumuon= await _unitOfWork.PhieuMuons.KiemTraVaTaoPhatQuaHan();
+            List<Phieumuon> lsphieumuon= await _unitOfWork.PhieuMuons.KiemTraVaTaoPhatQuaHan();
             await _unitOfWork.CompleteAsync();
             return Ok(lsphieumuon);
         }
