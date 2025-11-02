@@ -1,9 +1,7 @@
 ﻿using AutoMapper;
-using BackEnd.Interfaces;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using BackEnd.EF_Contexts;
+using Domain.Entities;
+using Application.Interfaces;
 using BackEnd.DTOs;
 
 namespace BackEnd.Controllers
