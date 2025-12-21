@@ -3,6 +3,8 @@ using Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using API.DTOs;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.AspNetCore.RateLimiting;
 namespace API.Controllers
 {
     [Route("api")]
@@ -10,15 +12,27 @@ namespace API.Controllers
     public class TaiLieuController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
-        public TaiLieuController(IUnitOfWork unitofwork) { 
+        private readonly IMemoryCache _cache;
+        private readonly string cachekey = "tailieulist";
+        public TaiLieuController(IUnitOfWork unitofwork, IMemoryCache memoryCache)
+        {
             _unitOfWork = unitofwork;
+            _cache = memoryCache;
         }
+        [EnableRateLimiting("per_ip")]
         [HttpGet("tailieus")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetAll() 
-        { 
-            List<TaiLieu> taiLieus = await _unitOfWork.tailieuRepo.GetTaiLieus();
-            return Ok(taiLieus);
+        public async Task<IActionResult> GetAll()
+        {
+            //List<TaiLieu> tailieus = await _unitOfWork.tailieuRepo.GetTaiLieus();
+            //return Ok(tailieus);
+            List<TaiLieu> tailieus;
+            if (!_cache.TryGetValue(cachekey, out tailieus))
+            {
+                tailieus = await _unitOfWork.tailieuRepo.GetTaiLieus();
+                _cache.Set(cachekey, tailieus);
+            }
+            return Ok(tailieus);
         }
         [HttpGet("tailieu/{id}")]
         public async Task<IActionResult> GetByID(int id)
@@ -42,24 +56,25 @@ namespace API.Controllers
             return Ok(tailieus);
         }
         [HttpGet("tailieu/advanced")]
-        public async Task<IActionResult> GetAdvanced([FromBody]TaiLieu tailieu)
+        public async Task<IActionResult> GetAdvanced([FromBody] TaiLieu tailieu)
         {
-            List<TaiLieu> tailieus= await _unitOfWork.tailieuRepo.GetAdvanced(tailieu);
+            List<TaiLieu> tailieus = await _unitOfWork.tailieuRepo.GetAdvanced(tailieu);
             return Ok(tailieus);
         }
         [HttpGet("tailieu/NXB/{id}")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetByNXB(int id) { 
-            List<TaiLieu> taiLieus=await _unitOfWork.tailieuRepo.GetByNXB(id);
-            if(taiLieus.Count == 0) return NoContent();
+        public async Task<IActionResult> GetByNXB(int id)
+        {
+            List<TaiLieu> taiLieus = await _unitOfWork.tailieuRepo.GetByNXB(id);
+            if (taiLieus.Count == 0) return NoContent();
             return Ok(taiLieus);
         }
         [HttpGet("tailieu/tacgia/{id}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetByTacGia(int id)
         {
-            List<TaiLieu> taiLieus =await _unitOfWork.tailieuRepo.GetByTacGia(id);
-            if(taiLieus?.Count == 0) return NoContent();
+            List<TaiLieu> taiLieus = await _unitOfWork.tailieuRepo.GetByTacGia(id);
+            if (taiLieus?.Count == 0) return NoContent();
             return Ok(taiLieus);
         }
 
@@ -74,7 +89,7 @@ namespace API.Controllers
         [HttpPost("tailieu")]
         public async Task<IActionResult> Create(CreateTaiLieuDTO tailieudto)
         {
-            if(tailieudto == null)
+            if (tailieudto == null)
             {
                 return BadRequest();
             }
@@ -91,7 +106,11 @@ namespace API.Controllers
             {
                 return BadRequest();
             }
-            foreach(int item in tailieudto.tacgias)
+            if(tailieudto.tailieu.GiaBan < 0)
+            {
+                return BadRequest();
+            }
+            foreach (int item in tailieudto.tacgias)
             {
                 bool ishastacgia = await _unitOfWork.tailieuRepo.ExistTacGia(item);
                 if (!ishastacgia)
@@ -110,6 +129,68 @@ namespace API.Controllers
             await _unitOfWork.tailieuRepo.Create(tailieudto.tailieu, tailieudto.tacgias, tailieudto.theloais);
             return Created();
 
+        }
+        [HttpDelete("tailieu/{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            bool ishas = await _unitOfWork.tailieuRepo.ExistID(id);
+            if (!ishas)
+            {
+                return NotFound();
+            }
+            bool result = await _unitOfWork.tailieuRepo.Delete(id);
+            if (!result)
+            {
+                return BadRequest();
+            }
+            return NoContent();
+        }
+        [HttpPatch("tailieu")]
+        public async Task<IActionResult> Update(UpdateTaiLieuDTO tailieudto)
+        {
+            if (tailieudto == null)
+            {
+                return BadRequest();
+            }
+            if(tailieudto.tailieu.MaTaiLieu<=0)
+            {
+                return BadRequest();
+            }
+            bool ishas = await _unitOfWork.tailieuRepo.ExistID(tailieudto.tailieu.MaTaiLieu);
+            if (ishas == false)
+            {
+                return BadRequest();
+            }
+            if (tailieudto.tailieu.MaNxb != null)
+            {
+                bool ishasnxb = await _unitOfWork.tailieuRepo.ExistNXB((int)tailieudto.tailieu.MaNxb);
+                if (!ishasnxb)
+                {
+                    return NotFound();
+                }
+            }
+            foreach (int item in tailieudto.tacgias)
+            {
+                bool ishastacgia = await _unitOfWork.tailieuRepo.ExistTacGia(item);
+                if (!ishastacgia)
+                {
+                    return NotFound();
+                }
+            }
+            foreach (int item in tailieudto.theloais)
+            {
+                bool ishastheloai = await _unitOfWork.tailieuRepo.ExistTheLoai(item);
+                if (!ishastheloai)
+                {
+                    return NotFound();
+                }
+            }
+            bool result = await _unitOfWork.tailieuRepo.Update(tailieudto.tailieu, tailieudto.tacgias, tailieudto.theloais);
+            if (!result)
+            {
+                return BadRequest();
+            }
+            return NoContent();
         }
     }
 }

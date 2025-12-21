@@ -29,6 +29,8 @@ public partial class DocGia
     public string? GhiChu { get; set; }
 
     public string? AnhDaiDien { get; set; }
+    public string? RefreshToken { get; set; }
+    public DateTime? RefreshTokenExpiryTime { get; set; }
 
     public virtual ICollection<DanhGiaBinhLuan> DanhGiaBinhLuans { get; set; } = new List<DanhGiaBinhLuan>();
 

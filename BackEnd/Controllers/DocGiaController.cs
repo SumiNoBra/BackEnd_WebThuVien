@@ -1,8 +1,10 @@
 ﻿using API.DTOs;
 using Application.Interfaces;
 using Domain.Entities;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace API.Controllers_V2
 {
@@ -11,12 +13,23 @@ namespace API.Controllers_V2
     public class DocGiaController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
-        public DocGiaController(IUnitOfWork unitofwork) { 
+        private readonly IMemoryCache _memory;
+        public string cacheKey = "lst";
+        public DocGiaController(IUnitOfWork unitofwork,IMemoryCache memory) { 
             _unitOfWork= unitofwork;
+            _memory= memory;
         }
+        [EnableRateLimiting("per_ip")]
         [HttpGet("docgias")]
-        public async Task<IActionResult> GetALL() { 
-            var docgias=await _unitOfWork.docgiarepo.GetDocGias();
+        [AllowAnonymous]
+        public async Task<IActionResult> GetALL() {
+
+            List<DocGia> docgias;
+            if (!_memory.TryGetValue(cacheKey, out docgias!))
+            {
+                docgias = await _unitOfWork.docgiarepo.GetDocGias();
+                _memory.Set(cacheKey, docgias, TimeSpan.FromSeconds(10));
+            }
             return Ok(docgias);
         }
         [HttpGet("docgia/{id}")]

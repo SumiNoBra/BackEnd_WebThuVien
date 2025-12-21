@@ -36,4 +36,10 @@ namespace API.DTOs
         public List<int> tacgias { get; set; } = new();
         public List<int> theloais { get; set; } = new();
     }
+    public class UpdateTaiLieuDTO
+    {
+        public TaiLieu tailieu { get; set; } = new();
+        public List<int> tacgias { get; set; } = new();
+        public List<int> theloais { get; set; } = new();
+    }
 }

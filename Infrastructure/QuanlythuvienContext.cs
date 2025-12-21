@@ -147,6 +147,12 @@ public partial class QuanlythuvienContext : DbContext
             entity.Property(e => e.MatKhau)
                 .HasMaxLength(64)
                 .IsUnicode(false);
+            entity.Property(e => e.RefreshToken)
+        .HasMaxLength(500)
+        .IsUnicode(false);
+
+            entity.Property(e => e.RefreshTokenExpiryTime)
+                .HasColumnType("datetime");
             entity.Property(e => e.SoDienThoai)
                 .HasMaxLength(13)
                 .IsUnicode(false);
@@ -285,7 +291,9 @@ public partial class QuanlythuvienContext : DbContext
             entity.HasKey(e => e.MaTaiLieu).HasName("PK__TaiLieu__FD18A65717B9E1EE");
 
             entity.ToTable("TaiLieu");
-
+            entity.Property(e => e.TrangThai)
+                .HasMaxLength(20)
+                .HasDefaultValue("Lưu thông");
             entity.Property(e => e.AnhBia)
                 .HasMaxLength(255)
                 .HasDefaultValue("default_book.png");

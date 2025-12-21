@@ -28,6 +28,7 @@ public partial class TaiLieu
     public int? SoLuongCon { get; set; }
 
     public string? AnhBia { get; set; }
+    public string? TrangThai { get; set; }
 
     public virtual ICollection<ChiTietDatTruoc> ChiTietDatTruocs { get; set; } = new List<ChiTietDatTruoc>();
 

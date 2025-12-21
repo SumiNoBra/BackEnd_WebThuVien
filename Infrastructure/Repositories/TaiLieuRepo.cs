@@ -45,6 +45,19 @@ namespace Infrastructure.Repositories
 
         }
 
+        public async Task<bool> Delete(int id)
+        {
+            var tailieu = await _context.TaiLieus.FirstOrDefaultAsync(e=>e.MaTaiLieu==id);
+            if (tailieu == null)
+            {
+                return false;
+            }
+            tailieu.TrangThai = "Không lưu thông";
+            _context.TaiLieus.Update(tailieu);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
         public async Task<bool> ExistID(int id)
         {
             return await _context.TaiLieus.AnyAsync(e => e.MaTaiLieu == id);
@@ -201,6 +214,84 @@ namespace Infrastructure.Repositories
                 .Include(e => e.MaNxbNavigation)
                 .Include(e => e.DanhGiaBinhLuans)
                 .ToListAsync();
+        }
+
+        public async Task<bool> Update(TaiLieu tailieu, List<int> tacgia, List<int> theloai)
+        {
+            var ishas = await _context.TaiLieus.Include(e => e.MaTacGia).Include(e => e.MaTheLoais).FirstOrDefaultAsync(e => e.MaTaiLieu == tailieu.MaTaiLieu);
+            if (ishas == null)
+            {
+                return false;
+            }
+            ishas.MaTacGia.Clear();
+            ishas.MaTheLoais.Clear();
+            List<TacGia> tacgias = await _context.TacGia
+                .Where(t => tacgia.Contains(t.MaTacGia))
+                .ToListAsync();
+            if (tacgias.Count != tacgia.Count)
+            {
+                throw new ArgumentNullException();
+            }
+
+            foreach (var tg in tacgias)
+            {
+                ishas.MaTacGia.Add(tg);
+            }
+            List<Theloai> theloais = await _context.Theloais
+                .Where(t => theloai.Contains(t.MaTheLoai))
+                .ToListAsync();
+            if (theloais.Count != theloai.Count)
+            {
+                throw new ArgumentNullException();
+            }
+
+            foreach (var tl in theloais)
+            {
+                ishas.MaTheLoais.Add(tl);
+            }
+            if(tailieu.TenSach != null)
+            {
+                ishas.TenSach = tailieu.TenSach;
+            }
+            if(tailieu.TomTat != null)
+            {
+                ishas.TomTat = tailieu.TomTat;
+            }
+            if(tailieu.NgonNgu != null)
+            {
+                ishas.NgonNgu = tailieu.NgonNgu;
+            }
+            if(tailieu.GiaBan >=0 && tailieu.GiaBan !=null)
+            {
+                ishas.GiaBan = tailieu.GiaBan;
+            }
+            if(tailieu.PhiMuon >=0 && tailieu.PhiMuon !=null)
+            {
+                ishas.PhiMuon = tailieu.PhiMuon;
+            }
+            if(tailieu.NamXuatBan != null && tailieu.NamXuatBan <= DateTime.Now.Year)
+            {
+                ishas.NamXuatBan = tailieu.NamXuatBan;
+            }
+            if (tailieu.SoLuong>=0 && tailieu.SoLuong != null)
+            {
+                ishas.SoLuong = tailieu.SoLuong;
+            }
+            if(tailieu.SoLuongCon >= 0 && tailieu.SoLuongCon != null)
+            {
+                ishas.SoLuongCon = tailieu.SoLuongCon;
+            }
+            if(tailieu.AnhBia != null)
+            {
+                ishas.AnhBia = tailieu.AnhBia;
+            }
+            if(!string.IsNullOrEmpty(tailieu.TrangThai))
+            {
+                ishas.TrangThai = tailieu.TrangThai;
+            }
+            _context.TaiLieus.Update(ishas);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

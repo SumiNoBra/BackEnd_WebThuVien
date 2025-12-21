@@ -35,6 +35,11 @@ namespace Infrastructure.Repositories
             return await _context.DocGia.AnyAsync(e => e.Email == email); 
         }
 
+        public async Task<DocGia?> GetByEmailAsync(string email)
+        {
+            return await _context.DocGia.FirstOrDefaultAsync(e => e.Email == email);
+        }
+
         public async Task<DocGia?> GetDocGia(int id)
         {
             return await _context.DocGia.FirstOrDefaultAsync(e => e.MaDocGia == id); 
@@ -43,6 +48,23 @@ namespace Infrastructure.Repositories
         public async Task<List<DocGia>> GetDocGias()
         {
             return await _context.DocGia.AsNoTracking().ToListAsync();
+        }
+
+        public async Task<DocGia?> GetUserByRefreshTokenAsync(string refreshToken)
+        {
+            return await _context.DocGia.FirstOrDefaultAsync(e => e.RefreshToken == refreshToken);
+        }
+
+        public async Task SaveRefreshTokenAsync(int maDocGia, string refreshToken, DateTime expiryDate)
+        {
+            var user = await _context.DocGia.FirstOrDefaultAsync(u => u.MaDocGia == maDocGia);
+
+            if (user != null)
+            {
+                user.RefreshToken = refreshToken;
+                user.RefreshTokenExpiryTime = expiryDate;
+                await _context.SaveChangesAsync();
+            }
         }
 
         public async Task<bool> UpdateDocGia(DocGia docgia)

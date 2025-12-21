@@ -12,11 +12,11 @@ namespace API.Controllers_V2
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly JwtTokenService _generateJwtToken;
+        private readonly IJwtTokenService _generateJwtToken;
         private readonly IMapper _mapper;
         private readonly IDocGiaRepo _docgiarepo;
         private readonly IGoogleAuthService _authService;
-        public AuthController(JwtTokenService generateJwtToken,IMapper mapper,IDocGiaRepo docgia, IGoogleAuthService googleAuthService) { 
+        public AuthController(IJwtTokenService generateJwtToken,IMapper mapper,IDocGiaRepo docgia, IGoogleAuthService googleAuthService) { 
             _mapper = mapper;
             _docgiarepo = docgia;
             _generateJwtToken = generateJwtToken;
@@ -25,36 +25,48 @@ namespace API.Controllers_V2
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDTo userlogin)
         {
-            string vaitro = "";
-            DocGia user=_mapper.Map<DocGia>(userlogin);
-            if (userlogin.MatKhau == null || string.IsNullOrEmpty(userlogin.MatKhau) ||
-                user.Email == null || string.IsNullOrEmpty(userlogin.Email)) {
-                return NotFound();
-            }
-
-            DocGia? isValidUser = await _docgiarepo.ExistDocGia(user.Email, user.MatKhau);
-            if (isValidUser != null)
+            if (userlogin == null || string.IsNullOrEmpty(userlogin.Email) || string.IsNullOrEmpty(userlogin.MatKhau))
             {
-                if (vaitro == "Thủ thư" || vaitro== "Quản lý")
-                {
-                    var token = _generateJwtToken.Generate(isValidUser.MaDocGia, user.Email!, "Admin");
-                    return Ok(new
-                    {
-                        Token = token,
-                        user = isValidUser
-                    });
-                }
-                else
-                {
-                    var token = _generateJwtToken.Generate(isValidUser.MaDocGia, user.Email!, "User");
-                    return Ok(new
-                    {
-                        Token = token,
-                        user = isValidUser
-                    });
-                }
+                return BadRequest(new { message = "Vui lòng nhập Email và Mật khẩu." });
             }
-            return NotFound();
+            DocGia? userEntity = await _docgiarepo.GetByEmailAsync(userlogin.Email);
+            if (userEntity==null)
+            {
+                return Unauthorized(new { message = "Tài khoản hoặc mật khẩu không chính xác." });
+            }
+            string vaitro = userEntity.VaiTro ?? "User";
+            var accessToken = _generateJwtToken.GenerateAccessToken(userEntity.MaDocGia, userEntity.Email!, vaitro);
+            var refreshToken = _generateJwtToken.GenerateRefreshToken();
+
+            await _docgiarepo.SaveRefreshTokenAsync(userEntity.MaDocGia, refreshToken.Token, refreshToken.ExpiryDate);
+            SetRefreshTokenCookie(refreshToken.Token, refreshToken.ExpiryDate);
+            var userResponse = new
+            {
+                Id = userEntity.MaDocGia,
+                Email = userEntity.Email,
+                HoTen = userEntity.HoTen,
+                VaiTro = vaitro
+            };
+            return Ok(new
+            {
+                success = true,
+                message = "Đăng nhập thành công",
+                accessToken = accessToken,
+                user = userResponse
+            });
+        }
+        private void SetRefreshTokenCookie(string token, DateTime expires)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,    
+                Expires = expires, 
+                Secure = true,      
+                SameSite = SameSiteMode.Strict,
+                IsEssential = true
+            };
+
+            Response.Cookies.Append("refreshToken", token, cookieOptions);
         }
         [Route("register")]
         [HttpPost]
@@ -69,8 +81,6 @@ namespace API.Controllers_V2
             await _docgiarepo.CreateDocGia(user);
             return Created();
         }
-
-
         [HttpPost("google-login")]
         public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginDTO model)
         {
@@ -99,6 +109,37 @@ namespace API.Controllers_V2
             {
                 return StatusCode(500, new { Message = "An unexpected error occurred." });
             }
+        }
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken()
+        {
+            var refreshToken = Request.Cookies["refreshToken"];
+
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                return BadRequest(new { message = "Không tìm thấy Refresh Token trong Cookie." });
+            }
+            var user = await _docgiarepo.GetUserByRefreshTokenAsync(refreshToken);
+            if (user == null)
+            {
+                return Unauthorized(new { message = "Token không hợp lệ." });
+            }
+
+            if (user.RefreshToken != refreshToken)
+            {
+                return Unauthorized(new { message = "Token không khớp." });
+            }
+
+            if (user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+            {
+                return Unauthorized(new { message = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại." });
+            }
+            var newAccessToken = _generateJwtToken.GenerateAccessToken(user.MaDocGia, user.Email!, user.VaiTro!);
+            return Ok(new
+            {
+                success = true,
+                accessToken = newAccessToken
+            });
         }
     }
 }

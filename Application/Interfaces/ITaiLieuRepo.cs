@@ -15,6 +15,8 @@ namespace Application.Interfaces
         public Task<bool> ExistNXB(int id);
         public Task<bool> ExistTacGia(int id);
         public Task<bool> ExistTheLoai(int id);
+        public Task<bool> Delete(int id);
+        public Task<bool> Update(TaiLieu tailieu, List<int> tacgia, List<int> theloai);
     }
 
 }

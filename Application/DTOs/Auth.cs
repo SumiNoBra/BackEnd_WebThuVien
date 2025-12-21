@@ -12,4 +12,9 @@ namespace Application.DTOs
         public string? CustomJwtToken { get; set; }
         public string? ErrorMessage { get; set; }
     }
+    public class RefreshToken
+    {
+        public string Token { get; set; } = string.Empty;
+        public DateTime ExpiryDate { get; set; }
+    }
 }
